@@ -20,11 +20,15 @@ public class App
         
         final Logger logger = LoggerFactory.getLogger("COORDINATOR");
         
+        FileUtils fileUtils = new FileUtils();
+        fileUtils.split("input_mapreduce.txt");
+
+        logger.info("Chunks generated");
+
         try (Jedis jedis = new Jedis(host, port);) {
             for (int i = 0; i < mappersAmount; i++) {
-                String channel = "mapper"+i+"_stasks";
+                String channel = "mapper:"+i;
                 jedis.publish(channel, "Executando tarefas");
-                logger.info("index >>>>> "+i);
             }
         }
     }

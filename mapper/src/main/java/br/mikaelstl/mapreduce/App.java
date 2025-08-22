@@ -18,11 +18,12 @@ public class App
         int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
         String mapperId = System.getenv().getOrDefault("MAPPER_ID", "0");
         
-        final String channel = "mapper"+mapperId+"_stasks";
+        final String channel = "mapper:"+mapperId;
 
         final Logger logger = LoggerFactory.getLogger("MAPPER"+mapperId);
         
         try (Jedis jedis = new Jedis(host, port);) {
+            logger.info(channel);
             jedis.subscribe(new JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {

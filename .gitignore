@@ -34,3 +34,6 @@ build/
 
 *.key
 *.pub
+
+*.txt
+*.json
