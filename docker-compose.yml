@@ -1,0 +1,106 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+     - redis-network
+
+  coordinator:
+    build: ./coordinator
+    container_name: coordinator
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPERS_AMOUNT=5
+      - REDUCERS_AMOUNT=2
+    networks:
+      - redis-network
+
+  mapper1:
+    build: ./mapper
+    container_name: mapper1
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPER_ID=1
+    networks:
+      - redis-network
+
+  mapper2:
+    build: ./mapper
+    container_name: mapper2
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPER_ID=2
+    networks:
+      - redis-network
+
+  mapper3:
+    build: ./mapper
+    container_name: mapper3
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPER_ID=3
+    networks:
+      - redis-network
+  
+  mapper4:
+    build: ./mapper
+    container_name: mapper4
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPER_ID=4
+    networks:
+      - redis-network
+
+  mapper5:
+    build: ./mapper
+    container_name: mapper5
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAPPER_ID=5
+    networks:
+      - redis-network
+  
+  # reducer:
+  #   build: ./reducer
+  #   container_name: reducer
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
+
+  # reducer:
+  #   build: .
+  #   command: ["node", "dist/reducer.js"]
+  #   volumes:
+  #     - ./reducer_inputs:/reducer_inputs
+  #     - ./reducer_outputs:/reducer_outputs
+  #   depends_on:
+  #     - redis
+  #   deploy:
+  #     replicas: 2
+    # networks:
+    #  - redis-network
+
+networks:
+  redis-network:
+    external: true
