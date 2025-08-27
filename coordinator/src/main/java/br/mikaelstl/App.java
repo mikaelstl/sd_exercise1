@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
 
 /**
  * Hello world!
@@ -29,7 +28,7 @@ public class App
 
         logger.info("Chunks generated");
         
-        Path chunksDir = Paths.get("data", "chunks");
+        Path chunksDir = Paths.get("shared", "data", "chunks");
         
         try (Jedis jedis = new Jedis(host, 6379)) {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(chunksDir)) {

@@ -20,7 +20,7 @@ services:
     networks:
       - redis-network
     volumes:
-      - ./shared:/data
+      - ./shared:/app/data
 
   mapper1:
     build: ./mapper
@@ -34,63 +34,63 @@ services:
     networks:
       - redis-network
     volumes:
-      - ./shared:/data
+      - ./shared:/app/data
 
-  mapper2:
-    build: ./mapper
-    container_name: mapper2
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MAPPER_ID=2
-    networks:
-      - redis-network
-    volumes:
-      - ./shared:/data
+  # mapper2:
+  #   build: ./mapper
+  #   container_name: mapper2
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - MAPPER_ID=2
+  #   networks:
+  #     - redis-network
+  #   volumes:
+  #     - ./shared:/data
 
-  mapper3:
-    build: ./mapper
-    container_name: mapper3
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MAPPER_ID=3
-    networks:
-      - redis-network
-    volumes:
-      - ./shared:/data
+  # mapper3:
+  #   build: ./mapper
+  #   container_name: mapper3
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - MAPPER_ID=3
+  #   networks:
+  #     - redis-network
+  #   volumes:
+  #     - ./shared:/data
   
-  mapper4:
-    build: ./mapper
-    container_name: mapper4
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MAPPER_ID=4
-    networks:
-      - redis-network
-    volumes:
-      - ./shared:/data
+  # mapper4:
+  #   build: ./mapper
+  #   container_name: mapper4
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - MAPPER_ID=4
+  #   networks:
+  #     - redis-network
+  #   volumes:
+  #     - ./shared:/data
 
-  mapper5:
-    build: ./mapper
-    container_name: mapper5
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MAPPER_ID=5
-    networks:
-      - redis-network
-    volumes:
-      - ./shared:/data
+  # mapper5:
+  #   build: ./mapper
+  #   container_name: mapper5
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - MAPPER_ID=5
+  #   networks:
+  #     - redis-network
+  #   volumes:
+  #     - ./shared:/data
   
   # reducer:
   #   build: ./reducer

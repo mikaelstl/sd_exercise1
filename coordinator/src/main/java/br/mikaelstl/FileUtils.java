@@ -14,8 +14,16 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
   private final Logger logger = LoggerFactory.getLogger("FileUtils");
 
+  public FileUtils() {
+    File dir = Enviroment.SHARED_DIR.toFile();
+
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+  }
+
   public void split(String filename) {
-    File filepath = Paths.get("data", filename).toFile();
+    File filepath = Enviroment.SHARED_DIR.resolve(filename).toFile();
     logger.info(filepath.getAbsolutePath());
     int parts = 10;
 
