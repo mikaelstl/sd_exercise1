@@ -19,6 +19,8 @@ services:
       - REDUCERS_AMOUNT=2
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
 
   mapper1:
     build: ./mapper
@@ -31,6 +33,8 @@ services:
       - MAPPER_ID=1
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
 
   mapper2:
     build: ./mapper
@@ -43,6 +47,8 @@ services:
       - MAPPER_ID=2
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
 
   mapper3:
     build: ./mapper
@@ -55,6 +61,8 @@ services:
       - MAPPER_ID=3
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
   
   mapper4:
     build: ./mapper
@@ -67,6 +75,8 @@ services:
       - MAPPER_ID=4
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
 
   mapper5:
     build: ./mapper
@@ -79,6 +89,8 @@ services:
       - MAPPER_ID=5
     networks:
       - redis-network
+    volumes:
+      - ./shared:/data
   
   # reducer:
   #   build: ./reducer

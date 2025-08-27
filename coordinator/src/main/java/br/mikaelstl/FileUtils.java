@@ -1,4 +1,4 @@
-package br.mikaelstl.mapreduce;
+package br.mikaelstl;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,7 +31,7 @@ public class FileUtils {
 
       for (int i = 0; i < parts; i++) {
         String chunkName = "chunk"+i+".txt";
-        File chunk = Paths.get("data", "chunks", chunkName).toFile();
+        File chunk = Paths.get("/data", "chunks", chunkName).toFile();
 
         try (
           BufferedWriter writer = new BufferedWriter(new FileWriter(chunk))
@@ -42,9 +42,40 @@ public class FileUtils {
             String line = reader.readLine();
             if (line == null) break;
 
-            writer.write(line);
-            writer.newLine();
+            String[] words = line.split("\\s+");
+            for (String w : words) {
+              writer.write(w.replaceAll("[^\\p{L}\\p{Nd}]", ""));
+              writer.newLine();
+            }
           }
+        }
+      }
+
+      reader.close();
+    } catch (IOException e) {
+      logger.error("Error to generate chunks: ", e);
+    }
+  }
+
+  public void process(File file, String output) {
+    try {
+      BufferedReader reader = new BufferedReader(new FileReader(file));
+
+      long lines = reader.lines().count();
+
+      reader.close();
+      reader = new BufferedReader(new FileReader(file));
+
+      File chunk = Paths.get("data", "intermediate", output).toFile();
+      for (int i = 0; i < lines; i++) {
+        try (
+          BufferedWriter writer = new BufferedWriter(new FileWriter(chunk))
+        ) {
+          String line = reader.readLine();
+          if (line == null) break;
+          
+          writer.write(line+", 1");
+          writer.newLine();
         }
       }
 

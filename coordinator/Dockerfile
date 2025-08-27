@@ -1,6 +1,6 @@
 # Exemplo usando a imagem do Maven
 FROM maven:3.8-openjdk-17 as builder
-WORKDIR /app
+WORKDIR .
 
 # Copie o arquivo pom.xml e o código fonte para o contêiner
 COPY pom.xml .
@@ -11,9 +11,9 @@ RUN mvn clean package -DskipTests
 
 # Use uma imagem mais leve para a etapa final (opcional)
 FROM openjdk:17-jdk-slim
-WORKDIR /usr/src/app
-COPY --from=builder /app/target/coordinator-1.0-SNAPSHOT.jar /usr/src/app/app.jar
+WORKDIR .
+COPY --from=builder /target/coordinator-1.0-SNAPSHOT.jar /usr/src/app/app.jar
 
 # Comando para executar o arquivo JAR
 # ENTRYPOINT ["java", "-jar", "/usr/src/app/app.jar"]
-ENTRYPOINT ["java", "-jar", "/usr/src/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
