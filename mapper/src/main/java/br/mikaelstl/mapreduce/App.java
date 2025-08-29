@@ -1,37 +1,48 @@
 package br.mikaelstl.mapreduce;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     public static void main( String[] args ) throws InterruptedException
     {
-        String host = System.getenv().getOrDefault("REDIS_HOST", "localhost");
-        int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
-        String mapperId = System.getenv().getOrDefault("MAPPER_ID", "0");
-        
-        final String channel = "mapper:"+mapperId;
+        final String channel = "mapper:"+Enviroment.MAPPER_ID;
 
-        final Logger logger = LoggerFactory.getLogger("MAPPER"+mapperId);
+        final Logger logger = LoggerFactory.getLogger("MAPPER"+Enviroment.MAPPER_ID);
         
-        try (Jedis jedis = new Jedis(host, port);) {
-            jedis.incr("mappers_ready");
-            logger.info(channel + " is ready.");
+        FileUtils fileUtils = new FileUtils();
+
+        int timeout = 5;
+
+        try (Jedis jedis = new Jedis(Enviroment.REDIS_HOST, Enviroment.REDIS_PORT);) {
+            logger.info("Mapper " + Enviroment.MAPPER_ID + " aguardando tarefas na fila...");
             
-            jedis.subscribe(new JedisPubSub() {
-                @Override
-                public void onMessage(String channel, String message) {
-                    logger.info("Mapper " + mapperId + " recebeu tarefa: " + message);
+            while (true) {
+                List<String> result = jedis.brpop(timeout, Enviroment.TASKS_QUEUE);
+
+                if (result == null) {
+                    logger.info("Fila vazia " + channel + " encerrando.");
+                    jedis.close();
+                    break;
                 }
-            }, channel);
+
+                String filename = result.get(1);
+                File chunk = Enviroment.SHARED_DIR.resolve("chunks").resolve(filename).toFile();
+
+                logger.info("Mapper " + Enviroment.MAPPER_ID + " recebeu tarefa: " + filename);
+                logger.info("Processando...");
+            
+                fileUtils.process(chunk);
+            }
         }
+
+        fileUtils.write("intermediate"+Enviroment.MAPPER_ID+".json");
     }
 }

@@ -16,7 +16,7 @@ public class App
         FileUtils fileUtils = new FileUtils();
 
         String host = System.getenv().getOrDefault("REDIS_HOST", "localhost");
-        int mappersAmmount = Integer.parseInt(System.getenv().getOrDefault("MAPPERS_AMOUNT", "5"));
+
         final Logger logger = LoggerFactory.getLogger("COORDINATOR");
         
         Path chunksDir = Enviroment.SHARED_DIR.resolve("chunks");
@@ -36,27 +36,15 @@ public class App
         }
         
         try (Jedis jedis = new Jedis(host, 6379)) {
-            String mappersReady = jedis.get("mappers_ready");
-
-            while (
-                mappersReady == null
-                ||
-                Integer.parseInt(mappersReady) < mappersAmmount
-            ) {
-                Thread.sleep(1000);
-            }
+            jedis.del(Enviroment.TASKS_QUEUE);
+            // String mappersReady = jedis.get("mappers_ready");
 
             for (File chunk : chunks) {
-                String filename = chunk.getName().replace(".txt", "");
-
-                int fileNumber = Integer.parseInt(filename.replace("chunk", ""));
-                logger.info("chunk number >>>>> "+fileNumber);
-                
-                String targetMapper = "mapper:"+(fileNumber%5);
-                
-                jedis.publish(targetMapper, filename);
+                jedis.rpush(Enviroment.TASKS_QUEUE, chunk.getName());
             }
 
+            logger.info(chunks.length + " chunks enfileirados em " + Enviroment.TASKS_QUEUE);
+            
             jedis.del("mappers_ready");
         } catch (Exception e) {
             logger.error("ERROR to send message to mapper", e);

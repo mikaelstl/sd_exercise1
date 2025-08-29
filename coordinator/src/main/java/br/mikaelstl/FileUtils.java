@@ -8,15 +8,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtils {
-  // private final HashMap<String, List<int>> words = new HashMap<>();
-
   private final Logger logger = LoggerFactory.getLogger("FileUtils");
 
   public FileUtils() {
