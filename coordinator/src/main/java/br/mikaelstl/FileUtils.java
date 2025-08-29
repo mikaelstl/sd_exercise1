@@ -6,20 +6,21 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileUtils {
+  // private final HashMap<String, List<int>> words = new HashMap<>();
+
   private final Logger logger = LoggerFactory.getLogger("FileUtils");
 
   public FileUtils() {
-    File dir = Enviroment.SHARED_DIR.toFile();
-
-    if (!dir.exists()) {
-      dir.mkdirs();
-    }
+    mkdirs();
   }
 
   public void split(String filename) {
@@ -29,7 +30,7 @@ public class FileUtils {
 
     try {
       BufferedReader reader = new BufferedReader(new FileReader(filepath));
-
+   
       long lines = reader.lines().count();
       long chunkLines = lines / parts;
       long rest = lines % parts;
@@ -39,7 +40,8 @@ public class FileUtils {
 
       for (int i = 0; i < parts; i++) {
         String chunkName = "chunk"+i+".txt";
-        File chunk = Paths.get("/data", "chunks", chunkName).toFile();
+        Path chunkDir = Enviroment.SHARED_DIR.resolve("chunks");
+        File chunk = chunkDir.resolve(chunkName).toFile();
 
         try (
           BufferedWriter writer = new BufferedWriter(new FileWriter(chunk))
@@ -50,11 +52,8 @@ public class FileUtils {
             String line = reader.readLine();
             if (line == null) break;
 
-            String[] words = line.split("\\s+");
-            for (String w : words) {
-              writer.write(w.replaceAll("[^\\p{L}\\p{Nd}]", ""));
-              writer.newLine();
-            }
+            writer.write(line.replaceAll("[^\\p{L}\\p{Nd}]", " "));
+            writer.newLine();
           }
         }
       }
@@ -90,6 +89,16 @@ public class FileUtils {
       reader.close();
     } catch (IOException e) {
       logger.error("Error to generate chunks: ", e);
+    }
+  }
+
+  private void mkdirs() {
+    File dir = Enviroment.SHARED_DIR.toFile();
+
+    logger.info("Directory exists: "+dir.exists());
+
+    if (!dir.exists()) {
+      dir.mkdirs();
     }
   }
 }

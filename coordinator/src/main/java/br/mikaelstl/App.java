@@ -1,51 +1,63 @@
 package br.mikaelstl;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
+import java.io.FilenameFilter;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     public static void main( String[] args )
     {
+        FileUtils fileUtils = new FileUtils();
+
         String host = System.getenv().getOrDefault("REDIS_HOST", "localhost");
+        int mappersAmmount = Integer.parseInt(System.getenv().getOrDefault("MAPPERS_AMOUNT", "5"));
         final Logger logger = LoggerFactory.getLogger("COORDINATOR");
         
-        FileUtils fileUtils = new FileUtils();
-        fileUtils.split("input_mapreduce.txt");
-
-        logger.info("Chunks generated");
+        Path chunksDir = Enviroment.SHARED_DIR.resolve("chunks");
         
-        Path chunksDir = Paths.get("shared", "data", "chunks");
+        FilenameFilter txtFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".txt");
+            }
+        };
+
+        File[] chunks = chunksDir.toFile().listFiles(txtFilter);
+
+        if (chunks.length == 0) {
+            fileUtils.split("input_mapreduce.txt");
+            logger.info("Chunks generated");
+        }
         
         try (Jedis jedis = new Jedis(host, 6379)) {
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(chunksDir)) {
-                for (Path chunk : stream) {
-                    File file = chunk.toFile();
-                    String filename = file.getName().replace(".txt", "");
+            String mappersReady = jedis.get("mappers_ready");
 
-                    int fileNumber = Integer.parseInt(filename.replace("chunk", ""));
-                    String targetMapper = "mapper:"+(fileNumber%5);
-
-                    if (file.getAbsolutePath().contains(".txt")) {
-                        jedis.publish(targetMapper, filename);
-                    }
-                }
-            } catch (IOException err) {
-                logger.info("Error to read directory: ", err);
+            while (
+                mappersReady == null
+                ||
+                Integer.parseInt(mappersReady) < mappersAmmount
+            ) {
+                Thread.sleep(1000);
             }
+
+            for (File chunk : chunks) {
+                String filename = chunk.getName().replace(".txt", "");
+
+                int fileNumber = Integer.parseInt(filename.replace("chunk", ""));
+                logger.info("chunk number >>>>> "+fileNumber);
+                
+                String targetMapper = "mapper:"+(fileNumber%5);
+                
+                jedis.publish(targetMapper, filename);
+            }
+
+            jedis.del("mappers_ready");
         } catch (Exception e) {
             logger.error("ERROR to send message to mapper", e);
         }

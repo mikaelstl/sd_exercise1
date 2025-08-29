@@ -23,7 +23,9 @@ public class App
         final Logger logger = LoggerFactory.getLogger("MAPPER"+mapperId);
         
         try (Jedis jedis = new Jedis(host, port);) {
-            logger.info(channel);
+            jedis.incr("mappers_ready");
+            logger.info(channel + " is ready.");
+            
             jedis.subscribe(new JedisPubSub() {
                 @Override
                 public void onMessage(String channel, String message) {

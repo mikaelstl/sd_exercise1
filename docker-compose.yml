@@ -20,7 +20,7 @@ services:
     networks:
       - redis-network
     volumes:
-      - ./shared:/app/data
+      - ./shared:/app/shared
 
   mapper1:
     build: ./mapper
@@ -34,7 +34,7 @@ services:
     networks:
       - redis-network
     volumes:
-      - ./shared:/app/data
+      - ./shared:/app/shared
 
   # mapper2:
   #   build: ./mapper
@@ -48,7 +48,7 @@ services:
   #   networks:
   #     - redis-network
   #   volumes:
-  #     - ./shared:/data
+  #     - ./shared:/app/shared
 
   # mapper3:
   #   build: ./mapper
@@ -62,7 +62,7 @@ services:
   #   networks:
   #     - redis-network
   #   volumes:
-  #     - ./shared:/data
+  #     - ./shared:/app/shared
   
   # mapper4:
   #   build: ./mapper
@@ -76,7 +76,7 @@ services:
   #   networks:
   #     - redis-network
   #   volumes:
-  #     - ./shared:/data
+  #     - ./shared:/app/shared
 
   # mapper5:
   #   build: ./mapper
@@ -90,7 +90,7 @@ services:
   #   networks:
   #     - redis-network
   #   volumes:
-  #     - ./shared:/data
+  #     - ./shared:/app/shared
   
   # reducer:
   #   build: ./reducer

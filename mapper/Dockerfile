@@ -11,9 +11,9 @@ RUN mvn clean package -DskipTests
 
 # Use uma imagem mais leve para a etapa final (opcional)
 FROM openjdk:17-jdk-slim
-WORKDIR /usr/src/app
-COPY --from=builder /app/target/mapper-1.0-SNAPSHOT.jar /usr/src/app/app.jar
+WORKDIR .
+COPY --from=builder /app/target/mapper-1.0-SNAPSHOT.jar /app/app.jar
 
 # Comando para executar o arquivo JAR
 # ENTRYPOINT ["java", "-jar", "/usr/src/app/app.jar"]
-ENTRYPOINT ["java", "-jar", "/usr/src/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
