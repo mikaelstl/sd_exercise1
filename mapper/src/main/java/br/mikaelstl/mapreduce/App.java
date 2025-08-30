@@ -1,7 +1,6 @@
 package br.mikaelstl.mapreduce;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,17 +18,14 @@ public class App
         
         FileUtils fileUtils = new FileUtils();
 
-        int timeout = 5;
-
         try (Jedis jedis = new Jedis(Enviroment.REDIS_HOST, Enviroment.REDIS_PORT);) {
             logger.info("Mapper " + Enviroment.MAPPER_ID + " aguardando tarefas na fila...");
             
             while (true) {
-                List<String> result = jedis.brpop(timeout, Enviroment.TASKS_QUEUE);
+                List<String> result = jedis.brpop(5, Enviroment.TASKS_QUEUE);
 
                 if (result == null) {
                     logger.info("Fila vazia " + channel + " encerrando.");
-                    jedis.close();
                     break;
                 }
 
@@ -41,8 +37,10 @@ public class App
             
                 fileUtils.process(chunk);
             }
-        }
 
-        fileUtils.write("intermediate"+Enviroment.MAPPER_ID+".json");
+            fileUtils.write("intermediate"+Enviroment.MAPPER_ID+".json");
+        
+            jedis.publish(Enviroment.MAPPER_DONE_FLAG, Enviroment.MAPPER_ID);
+        }
     }
 }
