@@ -8,9 +8,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileUtils {
   private final Logger logger = LoggerFactory.getLogger("FileUtils");
@@ -56,7 +60,8 @@ public class FileUtils {
 
       reader.close();
     } catch (IOException e) {
-      logger.error("Error to generate chunks: ", e);
+      logger.error("ERRO ao gerar chunks: ", e);
+      System.exit(1);
     }
   }
 
@@ -95,6 +100,30 @@ public class FileUtils {
 
     if (!dir.exists()) {
       dir.mkdirs();
+    }
+  }
+
+  public void write(String output, String key, List<Integer> values) {
+    File file = Enviroment.SHARED_DIR.resolve("rinputs").resolve(output).toFile();
+
+    if (!file.exists()) {
+      try {
+        file.createNewFile();      
+      } catch (IOException e) {
+        logger.error("ERRO ao criar arquivo: ", e);
+      }
+    }
+
+    HashMap<String, List<Integer>> word = new HashMap<>();
+    word.put(key, values);
+
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+    
+      mapper.writeValue(file, word);
+      logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
+    } catch (IOException e) {
+      logger.error("ERROR to write JSON: ", e);
     }
   }
 }

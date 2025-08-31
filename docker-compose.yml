@@ -92,26 +92,33 @@ services:
     volumes:
       - ./shared:/app/shared
   
-  # reducer:
-  #   build: ./reducer
-  #   container_name: reducer
-  #   depends_on:
-  #     - redis
-  #   environment:
-  #     - REDIS_HOST=redis
+  reducer1:
+    build: ./reducer
+    container_name: reducer1
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDUCER_ID=1
+    networks:
+      - redis-network
+    volumes:
+      - ./shared:/app/shared
 
-  # reducer:
-  #   build: .
-  #   command: ["node", "dist/reducer.js"]
-  #   volumes:
-  #     - ./reducer_inputs:/reducer_inputs
-  #     - ./reducer_outputs:/reducer_outputs
-  #   depends_on:
-  #     - redis
-  #   deploy:
-  #     replicas: 2
-    # networks:
-    #  - redis-network
+  reducer2:
+    build: ./reducer
+    container_name: reducer2
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDUCER_ID=2
+    networks:
+      - redis-network
+    volumes:
+      - ./shared:/app/shared
 
 networks:
   redis-network:

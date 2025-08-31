@@ -45,6 +45,10 @@ public class FileUtils {
   public void write(String output) {
     File file = Enviroment.SHARED_DIR.resolve("intermediate").resolve(output).toFile();
     
+    if (file.exists()) {
+      return;
+    }
+
     try {
       ObjectMapper mapper = new ObjectMapper();
     
@@ -53,5 +57,9 @@ public class FileUtils {
     } catch (IOException e) {
       logger.error("ERROR to write JSON: ", e);
     }
+  }
+
+  public boolean haveWords() {
+    return !words.isEmpty();
   }
 }

@@ -53,7 +53,7 @@
             <configuration>
                 <archive>
                     <manifest>
-                        <mainClass>br.mikaelstl.mapreduce.App</mainClass>
+                        <mainClass>br.mikaelstl.mapreduce.Mapper</mainClass>
                     </manifest>
                 </archive>
             </configuration>
@@ -71,7 +71,7 @@
               <configuration>
                 <createDependencyReducedPom>false</createDependencyReducedPom>
                 <manifestEntries>
-                  <Main-Class>br.mikaelstl.mapreduce.App</Main-Class>
+                  <Main-Class>br.mikaelstl.mapreduce.Mapper</Main-Class>
                 </manifestEntries>
               </configuration>
             </execution>

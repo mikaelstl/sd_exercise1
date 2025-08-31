@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
-public class App 
+public class Mapper 
 {
     public static void main( String[] args ) throws InterruptedException
     {
@@ -38,9 +38,11 @@ public class App
                 fileUtils.process(chunk);
             }
 
-            fileUtils.write("intermediate"+Enviroment.MAPPER_ID+".json");
-        
-            jedis.publish(Enviroment.MAPPER_DONE_FLAG, Enviroment.MAPPER_ID);
+            if (fileUtils.haveWords()) {
+                fileUtils.write("intermediate"+Enviroment.MAPPER_ID+".json");
+                
+                jedis.incr(Enviroment.MAPPER_DONE_FLAG);
+            }
         }
     }
 }
