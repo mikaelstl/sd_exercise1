@@ -1,6 +1,8 @@
 package br.mikaelstl.mapreduce;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -41,17 +43,38 @@ public class FileUtils {
   }
   
   public void write(String output) {
-    File file = Enviroment.SHARED_DIR.resolve("result").resolve(output).toFile();
-    
-    try {
-      ObjectMapper mapper = new ObjectMapper();
-      
-      mapper.writeValue(file, words);
-      logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
+    File file = Enviroment.SHARED_DIR.resolve("routput").resolve(output).toFile();
+
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+      words.forEach((key, value) -> {
+        try {
+          writer.write(key+": "+value);
+          writer.newLine();
+        } catch (IOException e) {
+          logger.error("ERRO ao escrever novo arquivo: ", e);
+        }
+      });
     } catch (IOException e) {
-      logger.error("ERROR to write JSON: ", e);
+      logger.error("ERRO ao escrever novo arquivo: ", e);
     }
   }
+
+  // public void write(String output) {
+  //   File file = Enviroment.SHARED_DIR.resolve("routput").resolve(output).toFile();
+    
+  //   try {
+  //     if (!file.exists()) {
+        
+  //     }
+
+  //     ObjectMapper mapper = new ObjectMapper();
+      
+  //     mapper.writeValue(file, words);
+  //     logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
+  //   } catch (IOException e) {
+  //     logger.error("ERROR to write JSON: ", e);
+  //   }
+  // }
 
   public boolean haveWords() {
     return !words.isEmpty();

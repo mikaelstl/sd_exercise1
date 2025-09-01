@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,10 +18,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileUtils {
+  List<HashMap<String, List<Integer>>> data = new ArrayList<HashMap<String,List<Integer>>>();
+
   private final Logger logger = LoggerFactory.getLogger("FileUtils");
 
   public FileUtils() {
     mkdirs();
+    data.add(new HashMap<>());
+    data.add(new HashMap<>());
   }
 
   public void split(String filename) {
@@ -66,32 +70,10 @@ public class FileUtils {
     }
   }
 
-  public void process(File file, String output) {
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(file));
+  public void process(int reducerId, String key, List<Integer> values) {
+    var words = data.get(reducerId);
 
-      long lines = reader.lines().count();
-
-      reader.close();
-      reader = new BufferedReader(new FileReader(file));
-
-      File chunk = Paths.get("data", "intermediate", output).toFile();
-      for (int i = 0; i < lines; i++) {
-        try (
-          BufferedWriter writer = new BufferedWriter(new FileWriter(chunk))
-        ) {
-          String line = reader.readLine();
-          if (line == null) break;
-          
-          writer.write(line+", 1");
-          writer.newLine();
-        }
-      }
-
-      reader.close();
-    } catch (IOException e) {
-      logger.error("Error to generate chunks: ", e);
-    }
+    words.computeIfAbsent(key, k -> values).addAll(values);
   }
 
   private void mkdirs() {
@@ -104,28 +86,27 @@ public class FileUtils {
     }
   }
 
-  public void write(String output, String key, List<Integer> values) {
-    File file = Enviroment.SHARED_DIR.resolve("rinputs").resolve(output).toFile();
-    
-    TypeReference<HashMap<String, List<Integer>>> ref = new TypeReference<>(){};
-
+  public void write() {
     ObjectMapper mapper = new ObjectMapper();
 
-    HashMap<String, List<Integer>> content = new HashMap<>();
-        
-    try {
-      if (file.exists() && file.length() > 0) {
-        content = mapper.readValue(file, ref);
-      } else {
-        file.createNewFile();
-      }
+    data.stream().forEach(
+      (words) -> {
+        int reducerId = data.indexOf(words);
 
-      content.computeIfAbsent(key, k -> values).addAll(values);
-        
-      mapper.writeValue(file, content);
-      logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
-    } catch (IOException e) {
-      logger.error("ERROR ao gerar JSON: ", e);
-    }
+        String output = "reducer_"+reducerId+"_input.json";
+
+        File file = Enviroment.SHARED_DIR.resolve("rinputs").resolve(output).toFile();
+      
+        try {
+          if (!file.exists()) {
+            file.createNewFile();
+          }
+
+          mapper.writeValue(file, words);
+        } catch (IOException e) {
+          logger.error("ERROR ao gerar JSON: ", e);
+        }
+      }
+    );
   }
 }

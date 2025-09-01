@@ -103,13 +103,12 @@ public class Coordinator
                 HashMap<String, List<Integer>> jsonFile = objectMapper.readValue(file, ref);
 
                 jsonFile.forEach((key, value) -> {
-                    int reducer = (Math.abs(key.hashCode()) % Enviroment.REDUCERS_AMOUNT) + 1;
+                    int reducer = Math.abs(key.hashCode()) % Enviroment.REDUCERS_AMOUNT;
 
-                    String output = "reducer_"+reducer+"_input.json";
-
-                    fileUtils.write(output, key, value);
+                    fileUtils.process(reducer, key, value);
                 });
             }
+            fileUtils.write();
             logger.info("Arquivos criados. Sinalizando para reducers.");
             
             jedis.incr("init_reducers");
