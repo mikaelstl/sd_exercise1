@@ -27,13 +27,13 @@ public class FileUtils {
       jsonFile.forEach((key, value) -> {
         words.merge(key, value.stream().mapToInt(Integer::intValue).sum(), Integer::sum);
   
-        try {
-          String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(words);
+        // try {
+        //   String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(words);
             
-          logger.info("Dados do usuário em formato JSON:\n{}", jsonString);
-        } catch (Exception e) {
-          logger.error("ERRO passar json para string: ", e);
-        }
+        //   logger.info("Dados do usuário em formato JSON:\n{}", jsonString);
+        // } catch (Exception e) {
+        //   logger.error("ERRO passar json para string: ", e);
+        // }
       });
     } catch (IOException e) {
       logger.error("ERRO ao gerar resultados do reducer:"+Enviroment.REDUCER_ID+": ", e);
@@ -45,7 +45,7 @@ public class FileUtils {
     
     try {
       ObjectMapper mapper = new ObjectMapper();
-    
+      
       mapper.writeValue(file, words);
       logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
     } catch (IOException e) {

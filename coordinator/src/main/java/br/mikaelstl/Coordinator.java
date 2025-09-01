@@ -69,7 +69,7 @@ public class Coordinator
 
             logger.info("Todos os mappers finalizaram. Iniciando fase de shuffle...");
             
-            // shuffle();
+            shuffle();
         } catch (Exception e) {
             logger.error("ERRO ao enviar mensagem para mapper: ", e);
         } finally {

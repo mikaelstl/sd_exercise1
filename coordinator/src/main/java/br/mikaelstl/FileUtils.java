@@ -14,6 +14,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileUtils {
@@ -105,25 +106,26 @@ public class FileUtils {
 
   public void write(String output, String key, List<Integer> values) {
     File file = Enviroment.SHARED_DIR.resolve("rinputs").resolve(output).toFile();
-
-    if (!file.exists()) {
-      try {
-        file.createNewFile();      
-      } catch (IOException e) {
-        logger.error("ERRO ao criar arquivo: ", e);
-      }
-    }
-
-    HashMap<String, List<Integer>> word = new HashMap<>();
-    word.put(key, values);
-
-    try {
-      ObjectMapper mapper = new ObjectMapper();
     
-      mapper.writeValue(file, word);
+    TypeReference<HashMap<String, List<Integer>>> ref = new TypeReference<>(){};
+
+    ObjectMapper mapper = new ObjectMapper();
+
+    HashMap<String, List<Integer>> content = new HashMap<>();
+        
+    try {
+      if (file.exists() && file.length() > 0) {
+        content = mapper.readValue(file, ref);
+      } else {
+        file.createNewFile();
+      }
+
+      content.computeIfAbsent(key, k -> values).addAll(values);
+        
+      mapper.writeValue(file, content);
       logger.info("Arquivo "+file.getName()+" gerado com sucesso.");
     } catch (IOException e) {
-      logger.error("ERROR to write JSON: ", e);
+      logger.error("ERROR ao gerar JSON: ", e);
     }
   }
 }
