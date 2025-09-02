@@ -14,7 +14,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FileUtils {
@@ -73,7 +72,7 @@ public class FileUtils {
   public void process(int reducerId, String key, List<Integer> values) {
     var words = data.get(reducerId);
 
-    words.computeIfAbsent(key, k -> values).addAll(values);
+    words.put(key, values);
   }
 
   private void mkdirs() {

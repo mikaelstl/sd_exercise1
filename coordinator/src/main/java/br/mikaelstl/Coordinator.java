@@ -1,6 +1,10 @@
 package br.mikaelstl;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -70,6 +74,8 @@ public class Coordinator
             logger.info("Todos os mappers finalizaram. Iniciando fase de shuffle...");
             
             shuffle();
+
+            joinResults();
         } catch (Exception e) {
             logger.error("ERRO ao enviar mensagem para mapper: ", e);
         } finally {
@@ -114,6 +120,42 @@ public class Coordinator
             jedis.incr("init_reducers");
         } catch (IOException e) {
             logger.error("ERRO ao ler arquivos JSON:", e);
+        }
+    }
+
+    static void joinResults() {
+        File result = Enviroment.SHARED_DIR.resolve("result").resolve("final_result.txt").toFile();
+
+        File routputsDir = Enviroment.SHARED_DIR.resolve("routput").toFile();
+
+        File[] outputs = routputsDir.listFiles();
+
+        if (outputs.length == 0) {
+            logger.error("ERRO nenhum arquivo retornado dos reducers. Encerrando...");
+            System.exit(1);
+        }
+
+        try (
+            BufferedWriter writer = new BufferedWriter(new FileWriter(result));
+        ) {
+            for (File file : outputs) {
+                try (
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
+                ) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        writer.write(line);
+                        writer.newLine();
+                    }
+
+                } catch (Exception e) {
+                    logger.error("ERRO ao ler arquivo "+file.getName()+": ", e);
+                }
+            }
+            logger.info("Arquivo final gerado em "+result.getAbsolutePath());
+            logger.info("Encerrando...");
+        } catch (Exception e) {
+            logger.error("ERRO ao gerar arquivo final.");
         }
     }
 }
