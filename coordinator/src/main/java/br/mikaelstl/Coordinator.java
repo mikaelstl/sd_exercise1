@@ -41,13 +41,14 @@ public class Coordinator
         };
 
         File[] chunks = chunksDir.toFile().listFiles(txtFilter);
-
         if (chunks.length == 0) {
             fileUtils.split("input_mapreduce.txt");
             logger.info("Chunks generated");
+            chunks = chunksDir.toFile().listFiles(txtFilter);
         }
         
         try {
+            jedis.incr("init_mappers");
             jedis.del(Enviroment.TASKS_QUEUE);
 
             for (File chunk : chunks) {
@@ -75,7 +76,23 @@ public class Coordinator
             
             shuffle();
 
+            int finishedReducers = 0;
+            while (finishedReducers < Enviroment.REDUCERS_AMOUNT) {
+                try {
+                    finishedReducers = Integer.parseInt(jedis.get("reducer_finished"));
+                } catch (NumberFormatException e) {
+                    finishedReducers = 0;
+                } catch (JedisConnectionException jedisConnectionException) {
+                    logger.error("ERRO de conexão com o Redis: ", jedisConnectionException);
+                    logger.info("Tentando novamente.");
+                    jedis = new Jedis(Enviroment.REDIS_HOST, Enviroment.REDIS_PORT);
+                    finishedReducers = 0;
+                }
+                Thread.sleep(1000);
+            }
+
             joinResults();
+
         } catch (Exception e) {
             logger.error("ERRO ao enviar mensagem para mapper: ", e);
         } finally {

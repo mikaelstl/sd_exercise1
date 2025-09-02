@@ -43,6 +43,8 @@ public class Reducer
             fileUtils.process(reducerInput);
 
             fileUtils.write("reducer_"+Enviroment.REDUCER_ID+"_output.txt");
+
+            jedis.incr("reducer_finished");
         }
     }
 }

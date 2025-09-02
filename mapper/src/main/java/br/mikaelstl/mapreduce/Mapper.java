@@ -21,21 +21,32 @@ public class Mapper
         try (Jedis jedis = new Jedis(Enviroment.REDIS_HOST, Enviroment.REDIS_PORT);) {
             logger.info("Mapper " + Enviroment.MAPPER_ID + " aguardando tarefas na fila...");
             
+            int init = 0;
+
             while (true) {
-                List<String> result = jedis.brpop(5, Enviroment.TASKS_QUEUE);
+                if (init == 0) {
+                    try {
+                        init = Integer.parseInt(jedis.get("init_mappers"));
+                    } catch (Exception e) {
+                        init = 0;
+                    }
+                    Thread.sleep(1000);
+                } else {
+                    List<String> result = jedis.brpop(5, Enviroment.TASKS_QUEUE);
 
-                if (result == null) {
-                    logger.info("Fila vazia " + channel + " encerrando.");
-                    break;
+                    if (result == null) {
+                        logger.info("Fila vazia " + channel + " encerrando.");
+                        break;
+                    }
+
+                    String filename = result.get(1);
+                    File chunk = Enviroment.SHARED_DIR.resolve("chunks").resolve(filename).toFile();
+
+                    logger.info("Mapper " + Enviroment.MAPPER_ID + " recebeu tarefa: " + filename);
+                    logger.info("Processando...");
+                
+                    fileUtils.process(chunk);
                 }
-
-                String filename = result.get(1);
-                File chunk = Enviroment.SHARED_DIR.resolve("chunks").resolve(filename).toFile();
-
-                logger.info("Mapper " + Enviroment.MAPPER_ID + " recebeu tarefa: " + filename);
-                logger.info("Processando...");
-            
-                fileUtils.process(chunk);
             }
 
             if (fileUtils.haveWords()) {
