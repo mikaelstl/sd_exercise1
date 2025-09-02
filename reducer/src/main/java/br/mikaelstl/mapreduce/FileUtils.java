@@ -37,6 +37,10 @@ public class FileUtils {
   public void write(String output) {
     File file = Enviroment.SHARED_DIR.resolve("routput").resolve(output).toFile();
 
+    if (file.exists() && file.length() > 0) {
+      return;
+    }
+
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
       words.forEach((key, value) -> {
         try {

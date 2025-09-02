@@ -45,7 +45,7 @@ public class FileUtils {
   public void write(String output) {
     File file = Enviroment.SHARED_DIR.resolve("intermediate").resolve(output).toFile();
     
-    if (file.exists()) {
+    if (file.exists() && file.length() > 0) {
       return;
     }
 
